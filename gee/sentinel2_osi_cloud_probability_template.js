@@ -90,12 +90,8 @@ var layerSuffix = siteName + ' - ' + dateLabel;
 // 2. AOI: Area of interest
 // 2. AOI: 解析対象範囲
 //
-// Replace this polygon with your own AOI.
-// This placeholder AOI is only for keeping the script syntactically complete.
-// この placeholder AOI は、スクリプトを完全な形で保つためのものです。
-//
-// Replace it before analysis.
-// 解析前に必ず置き換えてください。
+// Required: replace this placeholder polygon with your own AOI.
+// 必須: この placeholder polygon を自分の AOI に置き換えてください。
 //
 // GeoJSON copied from tools such as Planet Insight Browser
 // can be pasted here.
@@ -263,13 +259,16 @@ var osi = B3.add(B4)
 
 // Compute the local mean over water pixels only.
 // This reduces land/shoreline work and keeps the neighborhood comparison marine-focused.
+// Use a square kernel because Earth Engine's boxcar optimization requires
+// a square or rectangular kernel.
 // 水域ピクセルだけで局所平均を計算します。
 // 陸域・海岸線まわりの処理を減らし、海面同士の比較に寄せます。
+// Earth Engine の boxcar 最適化には square / rectangular kernel が必要です。
 var osiForLocalMean = osi.updateMask(water);
 
 var localMean = osiForLocalMean.reduceNeighborhood({
   reducer: ee.Reducer.mean(),
-  kernel: ee.Kernel.circle({
+  kernel: ee.Kernel.square({
     radius: localMeanRadiusMeters,
     units: 'meters'
   }),

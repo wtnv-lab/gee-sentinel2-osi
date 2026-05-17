@@ -90,18 +90,18 @@ var layerSuffix = siteName + ' - ' + dateLabel;
 // 2. AOI: Area of interest
 // 2. AOI: 解析対象範囲
 //
-// Kharg Island and surrounding waters.
-// Kharg Island 周辺海域。
+// Kharg Island focused AOI.
+// Kharg Island 周辺の絞り込み AOI。
 // -----------------------------------------------------
 
 var aoi = ee.Geometry({
   'type': 'Polygon',
   'coordinates': [[
-    [49.75708, 28.487643],
-    [49.75708, 29.415565],
-    [50.800781, 29.415565],
-    [50.800781, 28.487643],
-    [49.75708, 28.487643]
+    [50.183487, 29.166513],
+    [50.183487, 29.307058],
+    [50.445442, 29.307058],
+    [50.445442, 29.166513],
+    [50.183487, 29.166513]
   ]]
 });
 
@@ -254,13 +254,16 @@ var osi = B3.add(B4)
 
 // Compute the local mean over water pixels only.
 // This reduces land/shoreline work and keeps the neighborhood comparison marine-focused.
+// Use a square kernel because Earth Engine's boxcar optimization requires
+// a square or rectangular kernel.
 // 水域ピクセルだけで局所平均を計算します。
 // 陸域・海岸線まわりの処理を減らし、海面同士の比較に寄せます。
+// Earth Engine の boxcar 最適化には square / rectangular kernel が必要です。
 var osiForLocalMean = osi.updateMask(water);
 
 var localMean = osiForLocalMean.reduceNeighborhood({
   reducer: ee.Reducer.mean(),
-  kernel: ee.Kernel.circle({
+  kernel: ee.Kernel.square({
     radius: localMeanRadiusMeters,
     units: 'meters'
   }),

@@ -20,8 +20,8 @@ This workflow does not confirm oil pollution. It only extracts candidate optical
 
 | Path | Description |
 | --- | --- |
-| `gee/sentinel2_osi_cloud_probability_template.js` | Reusable Google Earth Engine Code Editor template with placeholder `siteName` and AOI |
-| `gee/examples/kharg_20260506_example.js` | Ready-to-run Kharg Island example for 2026-05-06 |
+| `gee/sentinel2_osi_cloud_probability_template.js` | Reusable Google Earth Engine Code Editor template; users must replace `siteName` and AOI |
+| `gee/examples/kharg_20260506_example.js` | Ready-to-run Kharg Island focused-AOI example for 2026-05-06 |
 | `LICENSE.md` | Suggested licensing: MIT for code, CC BY 4.0 for documentation/figures |
 | `SHARE_POSTS.md` | Short text for sharing the repository |
 
@@ -78,7 +78,7 @@ var aoi = ee.Geometry({
 
 GeoJSON-style polygons copied from tools such as Planet Insight Browser, QGIS, or geojson.io can be pasted here.
 
-The template file uses a small placeholder polygon near `0,0`. Replace it before using the workflow for analysis. The Kharg Island AOI is provided only in the example script.
+The template file contains only a small placeholder polygon near `0,0`; replace it before analysis. The Kharg Island AOI is provided in the example script.
 
 ### Change The Date
 
@@ -101,7 +101,7 @@ The script automatically creates `start`, `end`, `dateTag`, `dateLabel`, `export
 | `cloudProbabilityMax` | Pixel-level Cloud Probability cutoff for retaining candidates | `85` |
 | `ndwiThreshold` | NDWI threshold for water masking | `0.05` |
 | `osiAnomalyThreshold` | Absolute OSI anomaly threshold for candidate extraction | `0.15` |
-| `localMeanRadiusMeters` | Radius used to compute local mean OSI | `500` |
+| `localMeanRadiusMeters` | Half-width of the square window used to compute local mean OSI | `500` |
 | `trueColorMin` | True-color visualization minimum | `0` |
 | `trueColorMax` | True-color visualization maximum | `0.3` |
 | `trueColorGamma` | Gamma correction for true-color visualization | `1.0` |
@@ -206,7 +206,7 @@ var aoi = ee.Geometry({
 
 Planet Insight Browser、QGIS、geojson.io などからコピーした GeoJSON 形式の polygon を貼り付けることができます。
 
-template ファイルには `0,0` 付近の小さな placeholder polygon が入っています。解析に使う前に必ず置き換えてください。Kharg Island の AOI は example スクリプトにのみ入っています。
+template ファイルには `0,0` 付近の小さな placeholder polygon だけが入っています。解析前に必ず置き換えてください。Kharg Island の AOI は example スクリプトに入っています。
 
 ### 日付の変更方法
 
@@ -229,7 +229,7 @@ var analysisDate = '2026-05-06';
 | `cloudProbabilityMax` | 候補を残す Cloud Probability の上限 | `85` |
 | `ndwiThreshold` | 水域マスク用の NDWI 閾値 | `0.05` |
 | `osiAnomalyThreshold` | 候補抽出に使う OSI anomaly の絶対値閾値 | `0.15` |
-| `localMeanRadiusMeters` | 局所平均 OSI の計算半径 | `500` |
+| `localMeanRadiusMeters` | 局所平均 OSI を計算する square window の半幅 | `500` |
 | `trueColorMin` | True color 表示の最小値 | `0` |
 | `trueColorMax` | True color 表示の最大値 | `0.3` |
 | `trueColorGamma` | True color 表示のガンマ補正 | `1.0` |
