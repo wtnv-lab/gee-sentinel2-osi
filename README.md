@@ -181,10 +181,8 @@ This script is a screening and triage aid, not standalone evidence. False positi
 
 ### Citation / References
 
-- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
-- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: `10.3390/rs17020230`
-
-https://www.mdpi.com/2072-4292/17/2/230
+- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: [`10.29117/quarfe.2021.0020`](https://doi.org/10.29117/quarfe.2021.0020)
+- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: [`10.3390/rs17020230`](https://doi.org/10.3390/rs17020230)
 
 ### Credits And License
 
@@ -346,10 +344,8 @@ VNRI/IVI 任意実装例には、次の export もコメントアウトされた
 
 ### 引用・参考文献
 
-- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
-- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: `10.3390/rs17020230`
-
-https://www.mdpi.com/2072-4292/17/2/230
+- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: [`10.29117/quarfe.2021.0020`](https://doi.org/10.29117/quarfe.2021.0020)
+- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: [`10.3390/rs17020230`](https://doi.org/10.3390/rs17020230)
 
 ### クレジットとライセンス
 
