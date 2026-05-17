@@ -4,6 +4,12 @@ Google Earth Engine JavaScript scripts for screening Sentinel-2 imagery for cand
 
 Sentinel-2 画像から、海面油膜の光学的特徴と整合する可能性のある候補異常を抽出するための Google Earth Engine JavaScript スクリプトです。
 
+![Example visual preview: Sentinel-2 OSI candidate anomalies near Kharg Island](assets/thumbnail_20260506.jpg)
+
+Example visual preview near Kharg Island on 2026-05-06. Yellow pixels indicate candidate optical anomalies, not confirmed oil pollution.
+
+2026年5月6日の Kharg Island 周辺の表示例です。黄色のピクセルは光学的な候補異常であり、油汚染を確定するものではありません。
+
 ## Research Context / 研究背景
 
 This repository was prepared as part of the joint research project "Updating Reporting Methods with Advanced Technologies" between Hidenori Watanave Laboratory at the University of Tokyo Graduate School and Nippon TV.
@@ -22,6 +28,7 @@ This workflow does not confirm oil pollution. It only extracts candidate optical
 | --- | --- |
 | `gee/sentinel2_osi_cloud_probability_template.js` | Reusable Google Earth Engine Code Editor template; users must replace `siteName` and AOI |
 | `gee/examples/kharg_20260506_example.js` | Ready-to-run Kharg Island focused-AOI example for 2026-05-06 |
+| `assets/thumbnail_20260506.jpg` | README thumbnail image |
 | `LICENSE.md` | Suggested licensing: MIT for code, CC BY 4.0 for documentation/figures |
 | `SHARE_POSTS.md` | Short text for sharing the repository |
 
