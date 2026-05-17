@@ -1,6 +1,6 @@
 // =====================================================
-// Kharg Island example: Sentinel-2 sea-surface oil slick candidate extraction
-// Kharg Island 例: Sentinel-2 による海面油膜候補の抽出
+// Kharg Island VNRI/IVI optional example: Sentinel-2 oil slick candidate extraction
+// Kharg Island VNRI/IVI 任意実装例: Sentinel-2 による海面油膜候補の抽出
 //
 // Google Earth Engine Code Editor script
 // Google Earth Engine Code Editor 用スクリプト
@@ -12,11 +12,12 @@
 // 東京大学大学院 渡邉英徳研究室と日本テレビとの共同研究
 // 「先端技術を活用した報道手法のアップデート」の一環として整備。
 //
-// This script extracts candidate optical anomalies that may be
-// consistent with sea-surface oil slick signatures. It does not
-// confirm oil pollution.
+// This optional example extracts candidate optical anomalies using
+// VNRI and IVI anomaly screening based on D'Ugo et al. (2025).
+// It does not confirm oil pollution.
 // このスクリプトは、海面油膜の光学的特徴と整合する可能性のある
-// 候補異常を抽出します。油汚染を確定するものではありません。
+// 候補異常を VNRI / IVI anomaly により抽出する任意実装例です。
+// 油汚染を確定するものではありません。
 //
 // Recommended validation:
 // SAR imagery, AIS/vessel records, wind/current data,
@@ -53,7 +54,9 @@ var exportFolder = 'GEE_OSI_exports';
 var sceneCloudMax = 80;
 var cloudProbabilityMax = 85;
 var ndwiThreshold = 0.05;
-var osiAnomalyThreshold = 0.15;
+var vnriAnomalyThreshold = 0.05;
+var iviAnomalyThreshold = 0.25;
+var requireBothIndices = false;
 var localMeanRadiusMeters = 500;
 
 var trueColorMin = 0;
@@ -86,7 +89,7 @@ var end = nextDate(analysisDate);
 
 var dateTag = dateStringForFile(analysisDate);
 var dateLabel = analysisDate;
-var exportPrefix = siteName + '_OSI_' + dateTag;
+var exportPrefix = siteName + '_VNRI_IVI_' + dateTag;
 var layerSuffix = siteName + ' - ' + dateLabel;
 
 
@@ -176,7 +179,7 @@ print('Cloud Probability dates and tiles:', cloudInfo);
 // 6. Sentinel-2 モザイク
 // -----------------------------------------------------
 
-var s2Bands = ['B2', 'B3', 'B4', 'B8'];
+var s2Bands = ['B2', 'B3', 'B4', 'B6', 'B7', 'B8'];
 var imgRaw = s2
   .select(s2Bands)
   .mosaic()
@@ -221,6 +224,8 @@ var cloudRejected = cloudProbability
 var B2 = img.select('B2');   // Blue / 青, 10 m
 var B3 = img.select('B3');   // Green / 緑, 10 m
 var B4 = img.select('B4');   // Red / 赤, 10 m
+var B6 = img.select('B6');   // Red edge 740 nm / レッドエッジ 740 nm, 20 m
+var B7 = img.select('B7');   // Red edge 783 nm / レッドエッジ 783 nm, 20 m
 var B8 = img.select('B8');   // NIR / 近赤外, 10 m
 
 
@@ -241,58 +246,85 @@ var water = ndwi.gt(ndwiThreshold)
 
 
 // -----------------------------------------------------
-// 10. Oil Spill Index
-// 10. Oil Spill Index
+// 10. D'Ugo et al. VNRI and IVI indices
+// 10. D'Ugo et al. VNRI / IVI 指標
 //
-// OSI = (Green + Red) / Blue
-// OSI = (緑 + 赤) / 青
-// -----------------------------------------------------
-
-var osi = B3.add(B4)
-  .divide(B2)
-  .rename('OSI');
-
-
-// -----------------------------------------------------
-// 11. OSI anomaly
-// 11. OSI anomaly
+// VNRI = - (2 * r560 - r665 - r740) / (r560 + r665 + r740)
+// IVI  =   (r740 + r783 + r842) / (r490 + r560 + r665)
 //
-// Highlight pixels that differ from the local mean OSI.
-// 周辺の局所平均 OSI からの差分を強調します。
+// Sentinel-2 band mapping:
+// r490 = B2, r560 = B3, r665 = B4,
+// r740 = B6, r783 = B7, r842 = B8
+// Sentinel-2 バンド対応:
+// r490 = B2, r560 = B3, r665 = B4,
+// r740 = B6, r783 = B7, r842 = B8
+//
+// These indices are used by this optional example to build the candidate mask.
+// Because VNRI and IVI use 20 m red-edge bands, optional exports use 20 m scale.
+// この任意実装例では、これらの指標を候補マスク作成に使用します。
+// VNRI と IVI は 20 m の red-edge バンドを使うため、任意出力は 20 m scale です。
 // -----------------------------------------------------
 
-// Compute the local mean over water pixels only.
-// This reduces land/shoreline work and keeps the neighborhood comparison marine-focused.
-// Use a square kernel because Earth Engine's boxcar optimization requires
-// a square or rectangular kernel.
-// 水域ピクセルだけで局所平均を計算します。
-// 陸域・海岸線まわりの処理を減らし、海面同士の比較に寄せます。
-// Earth Engine の boxcar 最適化には square / rectangular kernel が必要です。
-var osiForLocalMean = osi.updateMask(water);
+var vnri = B3.multiply(2)
+  .subtract(B4)
+  .subtract(B6)
+  .divide(B3.add(B4).add(B6))
+  .multiply(-1)
+  .rename('VNRI');
 
-var localMean = osiForLocalMean.reduceNeighborhood({
-  reducer: ee.Reducer.mean(),
-  kernel: ee.Kernel.square({
-    radius: localMeanRadiusMeters,
-    units: 'meters'
-  }),
-  optimization: 'boxcar'
-});
+var ivi = B6.add(B7).add(B8)
+  .divide(B2.add(B3).add(B4))
+  .rename('IVI');
 
-var anomaly = osiForLocalMean.subtract(localMean)
-  .rename('OSI_anomaly');
+
+// -----------------------------------------------------
+// 11. VNRI / IVI anomaly
+// 11. VNRI / IVI anomaly
+//
+// Highlight pixels that differ from the local mean VNRI / IVI.
+// 周辺の局所平均 VNRI / IVI からの差分を強調します。
+// -----------------------------------------------------
+
+function localIndexAnomaly(indexImage, outputName) {
+  var waterIndex = indexImage.updateMask(water);
+
+  var localMean = waterIndex.reduceNeighborhood({
+    reducer: ee.Reducer.mean(),
+    kernel: ee.Kernel.square({
+      radius: localMeanRadiusMeters,
+      units: 'meters'
+    }),
+    optimization: 'boxcar'
+  });
+
+  return waterIndex.subtract(localMean).rename(outputName);
+}
+
+var vnriAnomaly = localIndexAnomaly(vnri, 'VNRI_anomaly');
+var iviAnomaly = localIndexAnomaly(ivi, 'IVI_anomaly');
 
 
 // -----------------------------------------------------
 // 12. Oil slick candidate mask
 // 12. 油膜候補マスク
 //
-// Candidate = OSI anomaly + water mask + Cloud Probability filter
-// 候補 = OSI anomaly + 水域マスク + Cloud Probability フィルタ
+// Candidate = VNRI / IVI anomaly + water mask + Cloud Probability filter
+// 候補 = VNRI / IVI anomaly + 水域マスク + Cloud Probability フィルタ
 // -----------------------------------------------------
 
-var baseCandidate = anomaly.abs()
-  .gt(osiAnomalyThreshold)
+var vnriCandidate = vnriAnomaly.abs()
+  .gt(vnriAnomalyThreshold)
+  .rename('vnri_candidate');
+
+var iviCandidate = iviAnomaly.abs()
+  .gt(iviAnomalyThreshold)
+  .rename('ivi_candidate');
+
+var indexCandidate = requireBothIndices ?
+  vnriCandidate.and(iviCandidate) :
+  vnriCandidate.or(iviCandidate);
+
+var baseCandidate = indexCandidate
   .and(water)
   .rename('base_oil_candidate');
 
@@ -382,27 +414,56 @@ Map.addLayer(
 
 /*
 Map.addLayer(
-  osi.updateMask(water),
+  vnriAnomaly,
   {
-    min: 0.8,
-    max: 2.0
+    min: -0.1,
+    max: 0.1,
+    palette: ['003f5c', 'f7f7f7', 'ffa600']
   },
-  'OSI over water - ' + layerSuffix,
+  'VNRI anomaly - ' + layerSuffix,
   false
 );
 */
 
 /*
 Map.addLayer(
-  anomaly.updateMask(water),
+  iviAnomaly,
   {
-    min: -0.15,
-    max: 0.15
+    min: -0.4,
+    max: 0.4,
+    palette: ['003f5c', 'f7f7f7', 'ffa600']
   },
-  'OSI anomaly - ' + layerSuffix,
+  'IVI anomaly - ' + layerSuffix,
   false
 );
 */
+
+/*
+Map.addLayer(
+  vnri.updateMask(water),
+  {
+    min: -0.5,
+    max: 0.5,
+    palette: ['003f5c', 'f7f7f7', 'ffa600']
+  },
+  'VNRI - ' + layerSuffix,
+  false
+);
+*/
+
+/*
+Map.addLayer(
+  ivi.updateMask(water),
+  {
+    min: 0.5,
+    max: 2.5,
+    palette: ['003f5c', 'f7f7f7', 'ffa600']
+  },
+  'IVI - ' + layerSuffix,
+  false
+);
+*/
+
 
 // -----------------------------------------------------
 // 15. Create images for export
@@ -424,8 +485,8 @@ var outputVis = trueColorVis.blend(candidateVis);
 // 16. Google Drive への標準出力
 // -----------------------------------------------------
 
-// True color + yellow oil candidate preview
-// True color + 黄色の油膜候補プレビュー
+// True color + yellow VNRI/IVI candidate preview
+// True color + 黄色の VNRI/IVI 候補プレビュー
 Export.image.toDrive({
   image: outputVis,
   description: exportPrefix + '_TrueColor',
@@ -483,15 +544,30 @@ Export.image.toDrive({
 // -----------------------------------------------------
 
 /*
-// OSI anomaly for later threshold testing in QGIS or other GIS tools
-// QGIS などで閾値を再検討するための OSI anomaly
+// VNRI anomaly for later threshold testing in QGIS or other GIS tools
+// QGIS などで閾値を再検討するための VNRI anomaly
 Export.image.toDrive({
-  image: anomaly.updateMask(water).float(),
-  description: exportPrefix + '_OSI_Anomaly',
+  image: vnriAnomaly.float(),
+  description: exportPrefix + '_VNRI_Anomaly',
   folder: exportFolder,
-  fileNamePrefix: exportPrefix + '_OSI_Anomaly',
+  fileNamePrefix: exportPrefix + '_VNRI_Anomaly',
   region: aoi,
-  scale: 10,
+  scale: 20,
+  crs: 'EPSG:4326',
+  maxPixels: 1e13
+});
+*/
+
+/*
+// IVI anomaly for later threshold testing in QGIS or other GIS tools
+// QGIS などで閾値を再検討するための IVI anomaly
+Export.image.toDrive({
+  image: iviAnomaly.float(),
+  description: exportPrefix + '_IVI_Anomaly',
+  folder: exportFolder,
+  fileNamePrefix: exportPrefix + '_IVI_Anomaly',
+  region: aoi,
+  scale: 20,
   crs: 'EPSG:4326',
   maxPixels: 1e13
 });
@@ -512,6 +588,37 @@ Export.image.toDrive({
 });
 */
 
+/*
+// VNRI from D'Ugo et al. (2025)
+// D'Ugo et al. (2025) の VNRI
+Export.image.toDrive({
+  image: vnri.updateMask(water).float(),
+  description: exportPrefix + '_VNRI',
+  folder: exportFolder,
+  fileNamePrefix: exportPrefix + '_VNRI',
+  region: aoi,
+  scale: 20,
+  crs: 'EPSG:4326',
+  maxPixels: 1e13
+});
+*/
+
+/*
+// IVI from D'Ugo et al. (2025)
+// D'Ugo et al. (2025) の IVI
+Export.image.toDrive({
+  image: ivi.updateMask(water).float(),
+  description: exportPrefix + '_IVI',
+  folder: exportFolder,
+  fileNamePrefix: exportPrefix + '_IVI',
+  region: aoi,
+  scale: 20,
+  crs: 'EPSG:4326',
+  maxPixels: 1e13
+});
+*/
+
+
 // -----------------------------------------------------
 // 18. Print analysis settings
 // 18. 解析条件を Console に表示
@@ -525,7 +632,9 @@ print('End:', end);
 print('Scene cloud max:', sceneCloudMax);
 print('Cloud probability max:', cloudProbabilityMax);
 print('NDWI threshold:', ndwiThreshold);
-print('OSI anomaly threshold:', osiAnomalyThreshold);
+print('VNRI anomaly threshold:', vnriAnomalyThreshold);
+print('IVI anomaly threshold:', iviAnomalyThreshold);
+print('Require both indices:', requireBothIndices);
 print('Local mean radius meters:', localMeanRadiusMeters);
 print('True color min:', trueColorMin);
 print('True color max:', trueColorMax);
@@ -548,11 +657,15 @@ print('True color brightness:', trueColorBrightness);
 //
 // If too many candidates appear:
 // 候補が出すぎる場合:
-//   osiAnomalyThreshold = 0.18 or 0.20
+//   vnriAnomalyThreshold = 0.08 or 0.10
+//   iviAnomalyThreshold = 0.35 or 0.45
+//   requireBothIndices = true
 //
 // If too few candidates appear:
 // 候補が少なすぎる場合:
-//   osiAnomalyThreshold = 0.10 or 0.08
+//   vnriAnomalyThreshold = 0.03 or 0.02
+//   iviAnomalyThreshold = 0.15 or 0.10
+//   requireBothIndices = false
 //
 // To make oil candidates stand out more on the true-color background:
 // True color 背景上で油膜候補をより目立たせる場合:

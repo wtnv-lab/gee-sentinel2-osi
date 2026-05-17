@@ -28,9 +28,9 @@ This workflow does not confirm oil pollution. It only extracts candidate optical
 | --- | --- |
 | `gee/sentinel2_osi_cloud_probability_template.js` | Reusable Google Earth Engine Code Editor template; users must replace `siteName` and AOI |
 | `gee/examples/kharg_20260506_example.js` | Ready-to-run Kharg Island focused-AOI example for 2026-05-06 |
+| `gee/examples/kharg_20260506_vnri_ivi_optional_example.js` | Optional implementation example that builds the candidate mask from VNRI/IVI anomaly screening |
 | `assets/thumbnail_20260506.jpg` | README thumbnail image |
 | `LICENSE.md` | Suggested licensing: MIT for code, CC BY 4.0 for documentation/figures |
-| `SHARE_POSTS.md` | Short text for sharing the repository |
 
 ## English Guide
 
@@ -50,6 +50,15 @@ It uses:
 
 Sentinel-2 and Cloud Probability collections are not joined by `system:index`; they are mosaicked separately for stability.
 
+The standard template and Kharg example use OSI anomaly for the default binary oil candidate mask.
+
+As an optional implementation example, this repository also includes a VNRI/IVI script based on D'Ugo et al. (2025):
+
+- VNRI: `VNRI = - (2 * r560 - r665 - r740) / (r560 + r665 + r740)`
+- IVI: `IVI = (r740 + r783 + r842) / (r490 + r560 + r665)`
+
+In Sentinel-2 terms, `r490 = B2`, `r560 = B3`, `r665 = B4`, `r740 = B6`, `r783 = B7`, and `r842 = B8`. Because VNRI and IVI use 20 m red-edge bands, their optional exports use `scale: 20`.
+
 ### Quick Start
 
 1. Open the [Google Earth Engine Code Editor](https://code.earthengine.google.com/).
@@ -66,6 +75,14 @@ For the Kharg Island example, use:
 ```text
 gee/examples/kharg_20260506_example.js
 ```
+
+For the optional VNRI/IVI implementation example, use:
+
+```text
+gee/examples/kharg_20260506_vnri_ivi_optional_example.js
+```
+
+This optional example is experimental. Compare its output with the standard OSI example and treat differences as screening clues, not confirmation.
 
 ### Replace The AOI
 
@@ -115,6 +132,14 @@ The script automatically creates `start`, `end`, `dateTag`, `dateLabel`, `export
 | `trueColorBrightness` | Brightness multiplier for the true-color background | `0.85` |
 | `oilOpacity` | Opacity of candidate overlay | `1.0` |
 
+VNRI/IVI optional example only:
+
+| Parameter | Meaning | Default |
+| --- | --- | --- |
+| `vnriAnomalyThreshold` | Absolute VNRI anomaly threshold | `0.05` |
+| `iviAnomalyThreshold` | Absolute IVI anomaly threshold | `0.25` |
+| `requireBothIndices` | If `true`, keeps only pixels detected by both VNRI and IVI anomaly screens | `false` |
+
 Adjustment notes:
 
 - If oil candidates are removed too aggressively, raise `cloudProbabilityMax` to `90` or `95`.
@@ -124,6 +149,8 @@ Adjustment notes:
 - To make oil candidates stand out more, lower `trueColorBrightness` to `0.75` or `0.8`, or raise `trueColorMax` to `0.35` or `0.4`.
 - Adjust `localMeanRadiusMeters` as needed. Larger values can slow `Mask` and `TrueColor` exports.
 - Lower `ndwiThreshold` to `0.0` if the water mask is too strict.
+- In the VNRI/IVI optional example, raise `vnriAnomalyThreshold` and `iviAnomalyThreshold` or set `requireBothIndices` to `true` if too many candidates appear.
+- In the VNRI/IVI optional example, lower `vnriAnomalyThreshold` and `iviAnomalyThreshold` if too few candidates appear.
 
 ### Export Outputs
 
@@ -136,22 +163,32 @@ Default exports:
 | Cloud probability | `Kharg_NTV_Whole_OSI_20260506_CloudProbability.tif` | Cloud-filter validation |
 | Natural color only | `Kharg_NTV_Whole_OSI_20260506_NaturalColor.tif` | Visual comparison and publication context |
 
-Optional exports are included but commented out by default:
+Optional exports in the standard OSI scripts are included but commented out by default:
 
 - `OSI anomaly`
 - `NDWI`
+
+The VNRI/IVI optional example also includes commented exports for:
+
+- `VNRI anomaly`
+- `IVI anomaly`
+- `VNRI`
+- `IVI`
 
 ### Scientific Limitations
 
 This script is a screening and triage aid, not standalone evidence. False positives may come from cloud edges, haze, sunglint, sediment, algal blooms, water-depth effects, compression or mosaicking artifacts, sensor/viewing geometry, and other non-oil surface phenomena.
 
-### Citation / Reference
+### Citation / References
 
-Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
+- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
+- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: `10.3390/rs17020230`
+
+https://www.mdpi.com/2072-4292/17/2/230
 
 ### Credits And License
 
-This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The OSI concept follows the Rajendran et al. reference above.
+This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The standard OSI workflow follows Rajendran et al. (2021). The optional VNRI/IVI implementation example follows D'Ugo et al. (2025).
 
 Suggested licensing:
 
@@ -178,6 +215,15 @@ See `LICENSE.md`.
 
 Sentinel-2 と Cloud Probability は `system:index` で join せず、それぞれ別々に mosaic します。
 
+標準の template と Kharg example では、標準の 2 値油膜候補マスクに OSI anomaly を使います。
+
+D'Ugo et al. (2025) に基づく任意の実装例として、VNRI/IVI 版も含めています。
+
+- VNRI: `VNRI = - (2 * r560 - r665 - r740) / (r560 + r665 + r740)`
+- IVI: `IVI = (r740 + r783 + r842) / (r490 + r560 + r665)`
+
+Sentinel-2 のバンド対応は、`r490 = B2`、`r560 = B3`、`r665 = B4`、`r740 = B6`、`r783 = B7`、`r842 = B8` です。VNRI と IVI は 20 m の red-edge バンドを使うため、任意出力では `scale: 20` を使います。
+
 ### クイックスタート
 
 1. [Google Earth Engine Code Editor](https://code.earthengine.google.com/) を開きます。
@@ -194,6 +240,14 @@ Kharg Island の例は次のファイルです。
 ```text
 gee/examples/kharg_20260506_example.js
 ```
+
+VNRI/IVI に基づく任意の実装例を試す場合は、次のファイルを使います。
+
+```text
+gee/examples/kharg_20260506_vnri_ivi_optional_example.js
+```
+
+この実装例は実験的なものです。標準の OSI example と出力を比較し、差分は確定情報ではなくスクリーニング上の手がかりとして扱ってください。
 
 ### AOI の置き換え方
 
@@ -243,6 +297,14 @@ var analysisDate = '2026-05-06';
 | `trueColorBrightness` | True color 背景の明るさ倍率 | `0.85` |
 | `oilOpacity` | 候補オーバーレイの不透明度 | `1.0` |
 
+VNRI/IVI 任意実装例のみ:
+
+| パラメータ | 意味 | デフォルト |
+| --- | --- | --- |
+| `vnriAnomalyThreshold` | VNRI anomaly の絶対値閾値 | `0.05` |
+| `iviAnomalyThreshold` | IVI anomaly の絶対値閾値 | `0.25` |
+| `requireBothIndices` | `true` の場合、VNRI と IVI の両方で検出されたピクセルだけを残します | `false` |
+
 調整メモ:
 
 - 油膜候補が Cloud Probability で消えすぎる場合は、`cloudProbabilityMax` を `90` または `95` に上げます。
@@ -252,6 +314,8 @@ var analysisDate = '2026-05-06';
 - 候補をより目立たせる場合は、`trueColorBrightness` を `0.75` または `0.8` に下げるか、`trueColorMax` を `0.35` または `0.4` に上げます。
 - 必要に応じて `localMeanRadiusMeters` を調整します。値を大きくすると `Mask` と `TrueColor` の出力が遅くなる場合があります。
 - 水域マスクが厳しすぎる場合は、`ndwiThreshold` を `0.0` に下げます。
+- VNRI/IVI 任意実装例で候補が多すぎる場合は、`vnriAnomalyThreshold` と `iviAnomalyThreshold` を上げるか、`requireBothIndices` を `true` にします。
+- VNRI/IVI 任意実装例で候補が少なすぎる場合は、`vnriAnomalyThreshold` と `iviAnomalyThreshold` を下げます。
 
 ### 出力される GeoTIFF
 
@@ -264,10 +328,17 @@ var analysisDate = '2026-05-06';
 | Cloud Probability | `Kharg_NTV_Whole_OSI_20260506_CloudProbability.tif` | 雲フィルタの検証 |
 | Natural Color のみ | `Kharg_NTV_Whole_OSI_20260506_NaturalColor.tif` | 比較・公開用の自然色画像 |
 
-追加出力として、次の export がコメントアウトされた状態で入っています。
+標準の OSI スクリプトには、次の export がコメントアウトされた状態で入っています。
 
 - `OSI anomaly`
 - `NDWI`
+
+VNRI/IVI 任意実装例には、次の export もコメントアウトされた状態で入っています。
+
+- `VNRI anomaly`
+- `IVI anomaly`
+- `VNRI`
+- `IVI`
 
 ### 科学的な限界
 
@@ -275,11 +346,14 @@ var analysisDate = '2026-05-06';
 
 ### 引用・参考文献
 
-Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
+- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
+- D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: `10.3390/rs17020230`
+
+https://www.mdpi.com/2072-4292/17/2/230
 
 ### クレジットとライセンス
 
-このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。OSI の考え方は上記の Rajendran et al. を参照しています。
+このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。標準の OSI ワークフローは Rajendran et al. (2021) を参照しています。任意の VNRI/IVI 実装例は D'Ugo et al. (2025) を参照しています。
 
 推奨ライセンス:
 

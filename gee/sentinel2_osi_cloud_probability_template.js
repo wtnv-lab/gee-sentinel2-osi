@@ -25,9 +25,13 @@
 // SAR画像、AIS/船舶情報、風・海流データ、時系列画像、
 // 現地情報や報告情報。
 //
-// Reference:
-// Rajendran et al. (2021), "Oil Spill Index (OSI) to
-// Sentinel-2 Satellite Data." DOI: 10.29117/quarfe.2021.0020
+// References:
+// - Rajendran et al. (2021), "Oil Spill Index (OSI) to
+//   Sentinel-2 Satellite Data." DOI: 10.29117/quarfe.2021.0020
+// - D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect
+//   and Monitor Oil Spills: Demonstration on 2024 Tobago Accident."
+//   Remote Sensing, 17(2), 230. DOI: 10.3390/rs17020230
+//   https://www.mdpi.com/2072-4292/17/2/230
 //
 // Notes:
 // - Uses Sentinel-2 Cloud Probability for cloud false-positive suppression.
@@ -120,7 +124,9 @@ var s2 = ee.ImageCollection('COPERNICUS/S2_HARMONIZED')
   .filterBounds(aoi)
   .filterDate(start, end)
   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', sceneCloudMax))
-  .sort('CLOUDY_PIXEL_PERCENTAGE');
+  // mosaic() gives priority to later images, so keep lower-cloud scenes last.
+  // mosaic() は後ろの画像を優先するため、低雲量シーンが後ろに来るようにします。
+  .sort('CLOUDY_PIXEL_PERCENTAGE', false);
 
 print('Number of Sentinel-2 images:', s2.size());
 print('Sentinel-2 image collection:', s2);
@@ -136,7 +142,8 @@ print('Sentinel-2 image collection:', s2);
 
 var s2Clouds = ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')
   .filterBounds(aoi)
-  .filterDate(start, end);
+  .filterDate(start, end)
+  .sort('system:time_start');
 
 print('Number of Cloud Probability images:', s2Clouds.size());
 print('Cloud Probability collection:', s2Clouds);
@@ -174,16 +181,18 @@ print('Cloud Probability dates and tiles:', cloudInfo);
 // 6. Sentinel-2 モザイク
 // -----------------------------------------------------
 
-var imgRaw = s2.mosaic().clip(aoi);
+var s2Bands = ['B2', 'B3', 'B4', 'B8'];
+var imgRaw = s2
+  .select(s2Bands)
+  .mosaic()
+  .clip(aoi);
 
 print('Mosaic image:', imgRaw);
 print('Mosaic band names:', imgRaw.bandNames());
 
-// Keep only the 10 m bands used by this workflow, then scale to reflectance.
-// このワークフローで使う 10 m バンドだけを残してから反射率へ変換します。
-var img = imgRaw
-  .select(['B2', 'B3', 'B4', 'B8'])
-  .divide(10000);
+// Scale Sentinel-2 integer values to reflectance.
+// Sentinel-2 の整数値を反射率へ変換します。
+var img = imgRaw.divide(10000);
 
 
 // -----------------------------------------------------
@@ -296,7 +305,7 @@ var candidate = baseCandidate
   .and(cloudClear)
   .rename('oil_candidate');
 
-var candidateByte = candidate.uint8()
+var candidateByte = candidate.unmask(0).uint8()
   .rename('oil_candidate');
 
 var candidateMask = candidateByte.updateMask(candidateByte);
@@ -399,7 +408,6 @@ Map.addLayer(
   false
 );
 */
-
 
 // -----------------------------------------------------
 // 15. Create images for export
@@ -508,7 +516,6 @@ Export.image.toDrive({
   maxPixels: 1e13
 });
 */
-
 
 // -----------------------------------------------------
 // 18. Print analysis settings
