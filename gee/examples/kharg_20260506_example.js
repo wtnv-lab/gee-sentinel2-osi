@@ -50,7 +50,7 @@ var sceneCloudMax = 80;
 var cloudProbabilityMax = 85;
 var ndwiThreshold = 0.05;
 var osiAnomalyThreshold = 0.15;
-var localMeanRadiusMeters = 1000;
+var localMeanRadiusMeters = 500;
 
 var trueColorMin = 0;
 var trueColorMax = 0.3;
@@ -174,9 +174,11 @@ var imgRaw = s2.mosaic().clip(aoi);
 print('Mosaic image:', imgRaw);
 print('Mosaic band names:', imgRaw.bandNames());
 
-// Sentinel-2 optical bands are scaled by 10000.
-// Sentinel-2 の光学バンドは 10000 倍で格納されています。
-var img = imgRaw.divide(10000);
+// Keep only the 10 m bands used by this workflow, then scale to reflectance.
+// このワークフローで使う 10 m バンドだけを残してから反射率へ変換します。
+var img = imgRaw
+  .select(['B2', 'B3', 'B4', 'B8'])
+  .divide(10000);
 
 
 // -----------------------------------------------------
@@ -185,9 +187,9 @@ var img = imgRaw.divide(10000);
 // -----------------------------------------------------
 
 var cloudProbability = s2Clouds
+  .select('probability')
   .mosaic()
   .clip(aoi)
-  .select('probability')
   .rename('cloud_probability');
 
 print('Cloud Probability mosaic:', cloudProbability);
@@ -250,15 +252,22 @@ var osi = B3.add(B4)
 // 周辺の局所平均 OSI からの差分を強調します。
 // -----------------------------------------------------
 
-var localMean = osi.reduceNeighborhood({
+// Compute the local mean over water pixels only.
+// This reduces land/shoreline work and keeps the neighborhood comparison marine-focused.
+// 水域ピクセルだけで局所平均を計算します。
+// 陸域・海岸線まわりの処理を減らし、海面同士の比較に寄せます。
+var osiForLocalMean = osi.updateMask(water);
+
+var localMean = osiForLocalMean.reduceNeighborhood({
   reducer: ee.Reducer.mean(),
   kernel: ee.Kernel.circle({
     radius: localMeanRadiusMeters,
     units: 'meters'
-  })
+  }),
+  optimization: 'boxcar'
 });
 
-var anomaly = osi.subtract(localMean)
+var anomaly = osiForLocalMean.subtract(localMean)
   .rename('OSI_anomaly');
 
 
@@ -279,6 +288,11 @@ var candidate = baseCandidate
   .and(cloudClear)
   .rename('oil_candidate');
 
+var candidateByte = candidate.uint8()
+  .rename('oil_candidate');
+
+var candidateMask = candidateByte.updateMask(candidateByte);
+
 var rejectedByCloudProbability = baseCandidate
   .and(cloudRejected)
   .rename('candidate_rejected_by_cloud_probability');
@@ -291,10 +305,10 @@ var rejectedByCloudProbability = baseCandidate
 
 Map.centerObject(aoi, 10);
 
-var trueColorDisplay = img.multiply(trueColorBrightness);
+var trueColorRgb = img.select(['B4', 'B3', 'B2']);
+var trueColorDisplay = trueColorRgb.multiply(trueColorBrightness);
 
 var trueColorVisParams = {
-  bands: ['B4', 'B3', 'B2'],
   min: trueColorMin,
   max: trueColorMax,
   gamma: trueColorGamma
@@ -307,7 +321,7 @@ Map.addLayer(
 );
 
 Map.addLayer(
-  candidate.updateMask(candidate),
+  candidateMask,
   {
     palette: ['yellow'],
     opacity: oilOpacity
@@ -386,7 +400,7 @@ Map.addLayer(
 
 var trueColorVis = trueColorDisplay.visualize(trueColorVisParams);
 
-var candidateVis = candidate.updateMask(candidate).visualize({
+var candidateVis = candidateMask.visualize({
   palette: ['yellow'],
   opacity: oilOpacity
 });
@@ -415,7 +429,7 @@ Export.image.toDrive({
 // Binary 0/1 oil candidate mask
 // 0/1 の油膜候補マスク
 Export.image.toDrive({
-  image: candidate.uint8(),
+  image: candidateByte,
   description: exportPrefix + '_Mask',
   folder: exportFolder,
   fileNamePrefix: exportPrefix + '_Mask',
@@ -537,6 +551,8 @@ print('True color brightness:', trueColorBrightness);
 //
 // Adjust localMeanRadiusMeters as needed.
 // 必要に応じて localMeanRadiusMeters を調整してください。
+// Larger values can slow Mask and TrueColor exports.
+// 値を大きくすると Mask と TrueColor の出力が遅くなる場合があります。
 //
 // If the water mask is too strict:
 // 水域マスクが厳しすぎる場合:

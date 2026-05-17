@@ -101,7 +101,7 @@ The script automatically creates `start`, `end`, `dateTag`, `dateLabel`, `export
 | `cloudProbabilityMax` | Pixel-level Cloud Probability cutoff for retaining candidates | `85` |
 | `ndwiThreshold` | NDWI threshold for water masking | `0.05` |
 | `osiAnomalyThreshold` | Absolute OSI anomaly threshold for candidate extraction | `0.15` |
-| `localMeanRadiusMeters` | Radius used to compute local mean OSI | `1000` |
+| `localMeanRadiusMeters` | Radius used to compute local mean OSI | `500` |
 | `trueColorMin` | True-color visualization minimum | `0` |
 | `trueColorMax` | True-color visualization maximum | `0.3` |
 | `trueColorGamma` | Gamma correction for true-color visualization | `1.0` |
@@ -115,7 +115,7 @@ Adjustment notes:
 - If too many candidates appear, raise `osiAnomalyThreshold` to `0.18` or `0.20`.
 - If too few candidates appear, lower `osiAnomalyThreshold` to `0.10` or `0.08`.
 - To make oil candidates stand out more, lower `trueColorBrightness` to `0.75` or `0.8`, or raise `trueColorMax` to `0.35` or `0.4`.
-- Adjust `localMeanRadiusMeters` as needed.
+- Adjust `localMeanRadiusMeters` as needed. Larger values can slow `Mask` and `TrueColor` exports.
 - Lower `ndwiThreshold` to `0.0` if the water mask is too strict.
 
 ### Export Outputs
@@ -229,7 +229,7 @@ var analysisDate = '2026-05-06';
 | `cloudProbabilityMax` | 候補を残す Cloud Probability の上限 | `85` |
 | `ndwiThreshold` | 水域マスク用の NDWI 閾値 | `0.05` |
 | `osiAnomalyThreshold` | 候補抽出に使う OSI anomaly の絶対値閾値 | `0.15` |
-| `localMeanRadiusMeters` | 局所平均 OSI の計算半径 | `1000` |
+| `localMeanRadiusMeters` | 局所平均 OSI の計算半径 | `500` |
 | `trueColorMin` | True color 表示の最小値 | `0` |
 | `trueColorMax` | True color 表示の最大値 | `0.3` |
 | `trueColorGamma` | True color 表示のガンマ補正 | `1.0` |
@@ -243,7 +243,7 @@ var analysisDate = '2026-05-06';
 - 候補が多すぎる場合は、`osiAnomalyThreshold` を `0.18` または `0.20` に上げます。
 - 候補が少なすぎる場合は、`osiAnomalyThreshold` を `0.10` または `0.08` に下げます。
 - 候補をより目立たせる場合は、`trueColorBrightness` を `0.75` または `0.8` に下げるか、`trueColorMax` を `0.35` または `0.4` に上げます。
-- 必要に応じて `localMeanRadiusMeters` を調整します。
+- 必要に応じて `localMeanRadiusMeters` を調整します。値を大きくすると `Mask` と `TrueColor` の出力が遅くなる場合があります。
 - 水域マスクが厳しすぎる場合は、`ndwiThreshold` を `0.0` に下げます。
 
 ### 出力される GeoTIFF
