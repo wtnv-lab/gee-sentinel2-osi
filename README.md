@@ -2,7 +2,9 @@
 
 Google Earth Engine JavaScript scripts for extracting candidate optical anomalies that may be consistent with possible sea-surface oil slick signatures in Sentinel-2 imagery.
 
-This project is a result of joint research with Nippon TV.
+This project was developed through joint research with Nippon TV.
+
+このプロジェクトは日本テレビとの共同研究成果です。
 
 This repository is designed for OSINT users, journalists, researchers, and students. It is a screening workflow, not a pollution confirmation method.
 
@@ -11,8 +13,6 @@ This repository is designed for OSINT users, journalists, researchers, and stude
 ### What The Script Does
 
 The script uses Google Earth Engine to process Sentinel-2 imagery over a user-defined AOI and single analysis date.
-
-This project is a public-release workflow developed as a result of joint research with Nippon TV.
 
 It uses:
 
@@ -24,7 +24,7 @@ It uses:
 - Sentinel-2 Cloud Probability to suppress cloud-related false positives
 - Google Drive GeoTIFF exports
 
-The workflow does not use SWIR filtering and does not use SCL filtering. Sentinel-2 and Cloud Probability collections are not joined by `system:index`; they are mosaicked separately for stability.
+Sentinel-2 and Cloud Probability collections are not joined by `system:index`; they are mosaicked separately for stability.
 
 ### Quick Start
 
@@ -143,8 +143,6 @@ Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." D
 
 ### Credits
 
-This project is a result of joint research with Nippon TV.
-
 This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The OSI concept follows the Rajendran et al. reference above.
 
 ### License Suggestion
@@ -158,13 +156,9 @@ See `LICENSE.md`.
 
 ## 日本語
 
-このプロジェクトは日本テレビとの共同研究成果です。
-
 ### このスクリプトが行うこと
 
 このスクリプトは、Google Earth Engine 上で Sentinel-2 画像を処理し、指定した AOI と解析日について、海面油膜の光学的特徴と整合する可能性のある候補異常を抽出します。
-
-このプロジェクトは、日本テレビとの共同研究成果を公開用ワークフローとして整理したものです。
 
 使用する主な要素:
 
@@ -176,7 +170,7 @@ See `LICENSE.md`.
 - Sentinel-2 Cloud Probability による雲由来の偽陽性抑制
 - Google Drive への GeoTIFF 出力
 
-このワークフローでは、SWIR フィルタリングと SCL フィルタリングは使用しません。Sentinel-2 と Cloud Probability は `system:index` で join せず、それぞれ別々に mosaic します。
+Sentinel-2 と Cloud Probability は `system:index` で join せず、それぞれ別々に mosaic します。
 
 ### クイックスタート
 
@@ -294,8 +288,6 @@ var analysisDate = '2026-05-06';
 Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: `10.29117/quarfe.2021.0020`
 
 ### クレジット
-
-このプロジェクトは日本テレビとの共同研究成果です。
 
 このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。OSI の考え方は上記の Rajendran et al. を参照しています。
 

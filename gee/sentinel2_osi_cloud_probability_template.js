@@ -28,10 +28,6 @@
 // Notes:
 // - Uses Sentinel-2 Cloud Probability for cloud false-positive suppression.
 // - Cloud Probability により雲由来の偽陽性を抑制します。
-// - Does not use SWIR filtering.
-// - SWIRフィルタリングは使用しません。
-// - Does not use SCL filtering.
-// - SCLフィルタリングは使用しません。
 // - Sentinel-2 and Cloud Probability are mosaicked separately.
 // - Sentinel-2 と Cloud Probability は join せず、別々に mosaic します。
 // =====================================================
@@ -208,8 +204,6 @@ var cloudRejected = cloudProbability
 // 8. Band definitions
 // 8. バンド定義
 //
-// SWIR bands are intentionally not used in this workflow.
-// このワークフローでは SWIR バンドを意図的に使用しません。
 // -----------------------------------------------------
 
 var B2 = img.select('B2');   // Blue / 青, 10 m
