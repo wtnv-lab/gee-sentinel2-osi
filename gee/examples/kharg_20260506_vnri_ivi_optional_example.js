@@ -27,8 +27,8 @@
 // 現地情報や報告情報。
 //
 // References:
-// - Rajendran et al. (2021), "Oil Spill Index (OSI) to
-//   Sentinel-2 Satellite Data." DOI: 10.29117/quarfe.2021.0020
+// - Sentinel Hub Custom Scripts, "Oil Spill Index (OSI)."
+//   https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/oil-spill-index/
 // - D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect
 //   and Monitor Oil Spills: Demonstration on 2024 Tobago Accident."
 //   Remote Sensing, 17(2), 230. DOI: 10.3390/rs17020230

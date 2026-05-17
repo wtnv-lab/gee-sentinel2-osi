@@ -181,12 +181,12 @@ This script is a screening and triage aid, not standalone evidence. False positi
 
 ### Citation / References
 
-- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: [`10.29117/quarfe.2021.0020`](https://doi.org/10.29117/quarfe.2021.0020)
+- Sentinel Hub Custom Scripts, "Oil Spill Index (OSI)." [`https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/oil-spill-index/`](https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/oil-spill-index/)
 - D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: [`10.3390/rs17020230`](https://doi.org/10.3390/rs17020230)
 
 ### Credits And License
 
-This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The standard OSI workflow follows Rajendran et al. (2021). The optional VNRI/IVI implementation example follows D'Ugo et al. (2025).
+This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The standard OSI workflow follows the Sentinel Hub OSI custom script reference. The optional VNRI/IVI implementation example follows D'Ugo et al. (2025).
 
 Suggested licensing:
 
@@ -344,12 +344,12 @@ VNRI/IVI 任意実装例には、次の export もコメントアウトされた
 
 ### 引用・参考文献
 
-- Rajendran et al. (2021), "Oil Spill Index (OSI) to Sentinel-2 Satellite Data." DOI: [`10.29117/quarfe.2021.0020`](https://doi.org/10.29117/quarfe.2021.0020)
+- Sentinel Hub Custom Scripts, "Oil Spill Index (OSI)." [`https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/oil-spill-index/`](https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/oil-spill-index/)
 - D'Ugo et al. (2025), "A Sentinel-2-Based System to Detect and Monitor Oil Spills: Demonstration on 2024 Tobago Accident." Remote Sensing, 17(2), 230. DOI: [`10.3390/rs17020230`](https://doi.org/10.3390/rs17020230)
 
 ### クレジットとライセンス
 
-このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。標準の OSI ワークフローは Rajendran et al. (2021) を参照しています。任意の VNRI/IVI 実装例は D'Ugo et al. (2025) を参照しています。
+このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。標準の OSI ワークフローは Sentinel Hub の OSI custom script reference を参照しています。任意の VNRI/IVI 実装例は D'Ugo et al. (2025) を参照しています。
 
 推奨ライセンス:
 
