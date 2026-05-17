@@ -54,6 +54,8 @@ var localMeanRadiusMeters = 1000;
 
 var trueColorMin = 0;
 var trueColorMax = 0.3;
+var trueColorGamma = 1.0;
+var trueColorBrightness = 0.85;
 var oilOpacity = 1.0;
 
 
@@ -289,13 +291,18 @@ var rejectedByCloudProbability = baseCandidate
 
 Map.centerObject(aoi, 10);
 
+var trueColorDisplay = img.multiply(trueColorBrightness);
+
+var trueColorVisParams = {
+  bands: ['B4', 'B3', 'B2'],
+  min: trueColorMin,
+  max: trueColorMax,
+  gamma: trueColorGamma
+};
+
 Map.addLayer(
-  img,
-  {
-    bands: ['B4', 'B3', 'B2'],
-    min: trueColorMin,
-    max: trueColorMax
-  },
+  trueColorDisplay,
+  trueColorVisParams,
   'True color - ' + layerSuffix
 );
 
@@ -377,11 +384,7 @@ Map.addLayer(
 // 15. 出力用画像の作成
 // -----------------------------------------------------
 
-var trueColorVis = img.visualize({
-  bands: ['B4', 'B3', 'B2'],
-  min: trueColorMin,
-  max: trueColorMax
-});
+var trueColorVis = trueColorDisplay.visualize(trueColorVisParams);
 
 var candidateVis = candidate.updateMask(candidate).visualize({
   palette: ['yellow'],
@@ -500,6 +503,10 @@ print('Cloud probability max:', cloudProbabilityMax);
 print('NDWI threshold:', ndwiThreshold);
 print('OSI anomaly threshold:', osiAnomalyThreshold);
 print('Local mean radius meters:', localMeanRadiusMeters);
+print('True color min:', trueColorMin);
+print('True color max:', trueColorMax);
+print('True color gamma:', trueColorGamma);
+print('True color brightness:', trueColorBrightness);
 
 
 // -----------------------------------------------------
@@ -522,6 +529,11 @@ print('Local mean radius meters:', localMeanRadiusMeters);
 // If too few candidates appear:
 // 候補が少なすぎる場合:
 //   osiAnomalyThreshold = 0.10 or 0.08
+//
+// To make oil candidates stand out more on the true-color background:
+// True color 背景上で油膜候補をより目立たせる場合:
+//   trueColorBrightness = 0.75 or 0.8
+//   trueColorMax = 0.35 or 0.4
 //
 // Adjust localMeanRadiusMeters as needed.
 // 必要に応じて localMeanRadiusMeters を調整してください。
