@@ -5,8 +5,12 @@
 // Google Earth Engine Code Editor script
 // Google Earth Engine Code Editor 用スクリプト
 //
-// This project is a result of joint research with Nippon TV.
-// このプロジェクトは日本テレビとの共同研究成果です。
+// Prepared as part of the joint research project
+// "Updating Reporting Methods with Advanced Technologies"
+// between Hidenori Watanave Laboratory at the
+// University of Tokyo Graduate School and Nippon TV.
+// 東京大学大学院 渡邉英徳研究室と日本テレビとの共同研究
+// 「先端技術を活用した報道手法のアップデート」の一環として整備。
 //
 // This script extracts candidate optical anomalies that may be
 // consistent with sea-surface oil slick signatures. It does not
