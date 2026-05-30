@@ -87,7 +87,7 @@ This optional example is experimental. Compare its output with the standard OSI 
 
 ### Sentinel-3 Copernicus Browser Script
 
-This repository also includes a simple Copernicus Browser / Sentinel Hub evalscript for Sentinel-3 OLCI:
+This repository also includes a simple Copernicus Browser / Sentinel Hub evalscript for Sentinel-3 OLCI. This Sentinel-3 script is a provisional version:
 
 ```text
 copernicus-browser/sentinel3_olci_osi_evalscript.js
@@ -271,7 +271,7 @@ gee/examples/kharg_20260506_vnri_ivi_optional_example.js
 
 ### Sentinel-3 Copernicus Browser スクリプト
 
-Sentinel-3 OLCI 用の簡易的な Copernicus Browser / Sentinel Hub evalscript も含めています。
+Sentinel-3 OLCI 用の簡易的な Copernicus Browser / Sentinel Hub evalscript も含めています。この Sentinel-3 スクリプトは仮バージョンです。
 
 ```text
 copernicus-browser/sentinel3_olci_osi_evalscript.js

@@ -6,6 +6,9 @@
 // Copernicus Browser / Sentinel Hub evalscript
 // Copernicus Browser / Sentinel Hub 用 evalscript
 //
+// Provisional version:
+// 仮バージョン:
+//
 // Important:
 // This is a visual screening aid only. It does not confirm oil pollution.
 // It is not equivalent to the Sentinel-2 / Google Earth Engine workflow:
