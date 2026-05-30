@@ -1,8 +1,8 @@
-# GEE Sentinel-2 OSI and Sentinel-3 Copernicus Browser Scripts
+# GEE Sentinel-2 OSI Cloud Probability Template
 
-Google Earth Engine JavaScript scripts for screening Sentinel-2 imagery, plus a Copernicus Browser evalscript for simple Sentinel-3 OLCI OSI visualization.
+Google Earth Engine JavaScript scripts for screening Sentinel-2 imagery for candidate optical anomalies that may be consistent with possible sea-surface oil slick signatures.
 
-Sentinel-2 画像から候補異常を抽出する Google Earth Engine JavaScript スクリプトと、Sentinel-3 OLCI の OSI を簡易可視化する Copernicus Browser 用 evalscript です。
+Sentinel-2 画像から、海面油膜の光学的特徴と整合する可能性のある候補異常を抽出するための Google Earth Engine JavaScript スクリプトです。
 
 ![Example visual preview: Sentinel-2 OSI candidate anomalies near Kharg Island](assets/thumbnail_20260506.jpg)
 
@@ -29,7 +29,6 @@ This workflow does not confirm oil pollution. It only extracts candidate optical
 | `gee/sentinel2_osi_cloud_probability_template.js` | Reusable Google Earth Engine Code Editor template; users must replace `siteName` and AOI |
 | `gee/examples/kharg_20260506_example.js` | Ready-to-run Kharg Island focused-AOI example for 2026-05-06 |
 | `gee/examples/kharg_20260506_vnri_ivi_optional_example.js` | Optional implementation example that builds the candidate mask from VNRI/IVI anomaly screening |
-| `copernicus-browser/sentinel3_olci_osi_evalscript.js` | Copernicus Browser / Sentinel Hub evalscript for Sentinel-3 OLCI OSI visualization |
 | `assets/thumbnail_20260506.jpg` | README thumbnail image |
 | `LICENSE.md` | Suggested licensing: MIT for code, CC BY 4.0 for documentation/figures |
 
@@ -84,27 +83,6 @@ gee/examples/kharg_20260506_vnri_ivi_optional_example.js
 ```
 
 This optional example is experimental. Compare its output with the standard OSI example and treat differences as screening clues, not confirmation.
-
-### Sentinel-3 Copernicus Browser Script
-
-This repository also includes a simple Copernicus Browser / Sentinel Hub evalscript for Sentinel-3 OLCI. This Sentinel-3 script is a provisional version:
-
-```text
-copernicus-browser/sentinel3_olci_osi_evalscript.js
-```
-
-It visualizes:
-
-- Natural color from OLCI `B08`, `B06`, and `B04`
-- OSI-positive pixels using `OSI = (B06 + B08) / B04`
-- NDWI/NIR water masking using OLCI `B06` and `B17`
-- Optional OSI heatmap mode by setting `showOsiHeatmapOnly = true`
-
-Sentinel-3 OLCI has coarser spatial resolution than Sentinel-2. This evalscript is a visual screening layer only; it includes a simple NDWI/NIR water mask, but it does not include the Earth Engine local-mean anomaly calculation, Cloud Probability filtering, or Drive exports. It should not be interpreted as equivalent to the Sentinel-2 / Google Earth Engine candidate-extraction workflow.
-
-Because the Sentinel-3 script uses a single-pixel OSI threshold, land, coastline, bright surfaces, sun glint, haze, clouds, and other artifacts may remain. For stricter use, inspect or combine it with Sentinel-3 OLCI `QUALITY_FLAGS`, especially `land`, `coastline`, `bright`, `invalid`, `sun_glint_risk`, and `dubious`.
-
-If land or shoreline pixels remain highlighted, raise `ndwiThreshold` to `0.05` or lower `nirWaterMax` to `0.08`. If weak offshore slick-like features disappear, lower `ndwiThreshold` to `-0.05` or raise `nirWaterMax` slightly.
 
 ### Replace The AOI
 
@@ -208,7 +186,7 @@ This script is a screening and triage aid, not standalone evidence. False positi
 
 ### Credits And License
 
-This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, Sentinel-2 Cloud Probability data, and an optional Copernicus Browser script for Sentinel-3 OLCI imagery. The standard OSI workflow follows the Sentinel Hub OSI custom script reference. The optional VNRI/IVI implementation example follows D'Ugo et al. (2025).
+This workflow uses Google Earth Engine, Copernicus Sentinel-2 imagery, and Sentinel-2 Cloud Probability data. The standard OSI workflow follows the Sentinel Hub OSI custom script reference. The optional VNRI/IVI implementation example follows D'Ugo et al. (2025).
 
 Suggested licensing:
 
@@ -268,27 +246,6 @@ gee/examples/kharg_20260506_vnri_ivi_optional_example.js
 ```
 
 この実装例は実験的なものです。標準の OSI example と出力を比較し、差分は確定情報ではなくスクリーニング上の手がかりとして扱ってください。
-
-### Sentinel-3 Copernicus Browser スクリプト
-
-Sentinel-3 OLCI 用の簡易的な Copernicus Browser / Sentinel Hub evalscript も含めています。この Sentinel-3 スクリプトは仮バージョンです。
-
-```text
-copernicus-browser/sentinel3_olci_osi_evalscript.js
-```
-
-このスクリプトは次を表示します。
-
-- OLCI の `B08`、`B06`、`B04` による自然色表示
-- `OSI = (B06 + B08) / B04` による OSI 陽性ピクセルの強調
-- OLCI の `B06` と `B17` による NDWI/NIR 水域マスク
-- `showOsiHeatmapOnly = true` による OSI ヒートマップ表示
-
-Sentinel-3 OLCI は Sentinel-2 より空間解像度が粗いため、この evalscript は目視スクリーニング用の表示レイヤとして扱ってください。簡易的な NDWI/NIR 水域マスクは含みますが、Earth Engine 版の局所平均 anomaly、Cloud Probability フィルタ、Drive export は含みません。Sentinel-2 / Google Earth Engine 版の候補抽出ワークフローと同等のものとして解釈しないでください。
-
-Sentinel-3 版は単一ピクセルの OSI しきい値を使うため、陸地、海岸線、明るい地表、サングリント、霞、雲、その他のアーティファクトが残ることがあります。より厳密に使う場合は、Sentinel-3 OLCI の `QUALITY_FLAGS`、特に `land`、`coastline`、`bright`、`invalid`、`sun_glint_risk`、`dubious` を確認・併用してください。
-
-陸地や海岸線が黄色く残る場合は、`ndwiThreshold` を `0.05` に上げるか、`nirWaterMax` を `0.08` に下げてください。沖合の弱い油膜状の特徴が消えすぎる場合は、`ndwiThreshold` を `-0.05` に下げるか、`nirWaterMax` を少し上げてください。
 
 ### AOI の置き換え方
 
@@ -392,7 +349,7 @@ VNRI/IVI 任意実装例には、次の export もコメントアウトされた
 
 ### クレジットとライセンス
 
-このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data、および Sentinel-3 OLCI imagery 用の任意の Copernicus Browser script を使用しています。標準の OSI ワークフローは Sentinel Hub の OSI custom script reference を参照しています。任意の VNRI/IVI 実装例は D'Ugo et al. (2025) を参照しています。
+このワークフローは、Google Earth Engine、Copernicus Sentinel-2 imagery、Sentinel-2 Cloud Probability data を使用しています。標準の OSI ワークフローは Sentinel Hub の OSI custom script reference を参照しています。任意の VNRI/IVI 実装例は D'Ugo et al. (2025) を参照しています。
 
 推奨ライセンス:
 
