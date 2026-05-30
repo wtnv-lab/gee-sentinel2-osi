@@ -8,8 +8,16 @@
 //
 // Important:
 // This is a visual screening aid only. It does not confirm oil pollution.
+// It is not equivalent to the Sentinel-2 / Google Earth Engine workflow:
+// this script uses a single-pixel OSI threshold, not local-mean OSI anomaly.
+// For stricter screening, combine this view with Sentinel-3 OLCI QUALITY_FLAGS
+// such as land, coastline, bright, invalid, sun_glint_risk, and dubious.
 // 重要:
 // これは目視スクリーニング用の補助表示であり、油汚染を確定するものではありません。
+// Sentinel-2 / Google Earth Engine 版と同等ではありません。
+// このスクリプトは局所平均 OSI anomaly ではなく、単一ピクセルの OSI しきい値を使います。
+// より厳密に確認する場合は、land、coastline、bright、invalid、
+// sun_glint_risk、dubious などの Sentinel-3 OLCI QUALITY_FLAGS と併用してください。
 // =====================================================
 
 

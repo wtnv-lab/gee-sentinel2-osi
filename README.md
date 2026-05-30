@@ -100,7 +100,9 @@ It visualizes:
 - NDWI/NIR water masking using OLCI `B06` and `B17`
 - Optional OSI heatmap mode by setting `showOsiHeatmapOnly = true`
 
-Sentinel-3 OLCI has coarser spatial resolution than Sentinel-2. This evalscript is a visual screening layer only; it includes a simple NDWI/NIR water mask, but it does not include the Earth Engine local-mean anomaly calculation, Cloud Probability filtering, or Drive exports.
+Sentinel-3 OLCI has coarser spatial resolution than Sentinel-2. This evalscript is a visual screening layer only; it includes a simple NDWI/NIR water mask, but it does not include the Earth Engine local-mean anomaly calculation, Cloud Probability filtering, or Drive exports. It should not be interpreted as equivalent to the Sentinel-2 / Google Earth Engine candidate-extraction workflow.
+
+Because the Sentinel-3 script uses a single-pixel OSI threshold, land, coastline, bright surfaces, sun glint, haze, clouds, and other artifacts may remain. For stricter use, inspect or combine it with Sentinel-3 OLCI `QUALITY_FLAGS`, especially `land`, `coastline`, `bright`, `invalid`, `sun_glint_risk`, and `dubious`.
 
 If land or shoreline pixels remain highlighted, raise `ndwiThreshold` to `0.05` or lower `nirWaterMax` to `0.08`. If weak offshore slick-like features disappear, lower `ndwiThreshold` to `-0.05` or raise `nirWaterMax` slightly.
 
@@ -282,7 +284,9 @@ copernicus-browser/sentinel3_olci_osi_evalscript.js
 - OLCI の `B06` と `B17` による NDWI/NIR 水域マスク
 - `showOsiHeatmapOnly = true` による OSI ヒートマップ表示
 
-Sentinel-3 OLCI は Sentinel-2 より空間解像度が粗いため、この evalscript は目視スクリーニング用の表示レイヤとして扱ってください。簡易的な NDWI/NIR 水域マスクは含みますが、Earth Engine 版の局所平均 anomaly、Cloud Probability フィルタ、Drive export は含みません。
+Sentinel-3 OLCI は Sentinel-2 より空間解像度が粗いため、この evalscript は目視スクリーニング用の表示レイヤとして扱ってください。簡易的な NDWI/NIR 水域マスクは含みますが、Earth Engine 版の局所平均 anomaly、Cloud Probability フィルタ、Drive export は含みません。Sentinel-2 / Google Earth Engine 版の候補抽出ワークフローと同等のものとして解釈しないでください。
+
+Sentinel-3 版は単一ピクセルの OSI しきい値を使うため、陸地、海岸線、明るい地表、サングリント、霞、雲、その他のアーティファクトが残ることがあります。より厳密に使う場合は、Sentinel-3 OLCI の `QUALITY_FLAGS`、特に `land`、`coastline`、`bright`、`invalid`、`sun_glint_risk`、`dubious` を確認・併用してください。
 
 陸地や海岸線が黄色く残る場合は、`ndwiThreshold` を `0.05` に上げるか、`nirWaterMax` を `0.08` に下げてください。沖合の弱い油膜状の特徴が消えすぎる場合は、`ndwiThreshold` を `-0.05` に下げるか、`nirWaterMax` を少し上げてください。
 
